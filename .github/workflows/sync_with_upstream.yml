@@ -1,0 +1,23 @@
+name: Sync Fork with Upstream
+
+on:
+  schedule:
+    - cron: '0 6 * * *' # Jalankan setiap hari pukul 6 AM UTC (1 PM WIB)
+  workflow_dispatch: # Memungkinkan eksekusi manual
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Fork Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Add Upstream Repository
+        run: |
+          git remote add upstream https://github.com/SigmaHQ/sigma.git
+          git fetch upstream
+          git checkout main
+          git merge upstream/main
+          git push origin main
