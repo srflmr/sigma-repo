@@ -22,6 +22,11 @@ jobs:
           git remote | grep upstream || git remote add upstream https://github.com/SigmaHQ/sigma.git
           git fetch upstream
 
+      - name: Configure Git Identity
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+
       - name: Checkout and Merge
         run: |
           DEFAULT_BRANCH=$(git remote show origin | grep 'HEAD branch' | cut -d' ' -f5)
