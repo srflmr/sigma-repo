@@ -5,6 +5,9 @@ on:
     - cron: '0 6 * * *' # Jalankan setiap hari pukul 6 AM UTC (1 PM WIB)
   workflow_dispatch: # Memungkinkan eksekusi manual
 
+permissions:
+  contents: write
+
 jobs:
   sync:
     runs-on: ubuntu-latest
@@ -14,16 +17,14 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Validate Branches
-        run: git branch -a
-
       - name: Add Upstream Repository
         run: |
-          git remote add upstream https://github.com/SigmaHQ/sigma.git
+          git remote | grep upstream || git remote add upstream https://github.com/SigmaHQ/sigma.git
           git fetch upstream
 
       - name: Checkout and Merge
         run: |
-          git checkout main || git checkout master
-          git merge upstream/main || git merge upstream/master
-          git push origin main || git push origin master
+          DEFAULT_BRANCH=$(git remote show origin | grep 'HEAD branch' | cut -d' ' -f5)
+          git checkout $DEFAULT_BRANCH
+          git merge upstream/$DEFAULT_BRANCH --strategy-option theirs
+          git push origin $DEFAULT_BRANCH
