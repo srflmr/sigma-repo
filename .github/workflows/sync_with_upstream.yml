@@ -1,17 +1,14 @@
-name: Sync Fork with Upstream
+name: Sync Fork with Upstream 
 
 on:
   schedule:
-    - cron: '0 6 * * *'   # Setiap hari 13:00 WIB
-  workflow_dispatch:       # Bisa dijalankan manual
-
-permissions:
-  contents: write
-  workflows: write
+    - cron: '0 6 * * *'   # Setiap hari pukul 13:00 WIB
+  workflow_dispatch:
 
 jobs:
   sync:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Fork
         uses: actions/checkout@v3
@@ -28,11 +25,17 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Merge Changes
+      - name: Merge from Upstream Without Workflows
         run: |
           git checkout master
-          git merge upstream/master --strategy-option theirs || true
+          git merge upstream/master --no-commit --strategy-option theirs || true
 
-      - name: Push Changes
+          # Exclude workflow files from commit
+          git reset .github/workflows
+          git checkout HEAD .github/workflows || true
+
+          git commit -m "Sync with upstream (excluding workflows)" || echo "Nothing to commit"
+
+      - name: Push to Origin
         run: |
           git push origin master
